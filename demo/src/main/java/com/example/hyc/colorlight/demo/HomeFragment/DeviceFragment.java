@@ -38,6 +38,8 @@ import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yanzhenjie.recyclerview.swipe.touch.OnItemMoveListener;
 
 
+import org.litepal.crud.DataSupport;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,7 +60,7 @@ public class DeviceFragment extends Fragment {
 
     private LampAdapter adapter;
 
-    private AddReceiver addReceiver=null;
+    private AddReceiver addReceiver = null;
 
     private int position;  //左滑删除时获取位置
 
@@ -69,83 +71,98 @@ public class DeviceFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         //注册广播接收器接收Mqtt回调信息
-        addReceiver=new AddReceiver();
-        IntentFilter filter=new IntentFilter();
+        addReceiver = new AddReceiver();
+        IntentFilter filter = new IntentFilter();
         filter.addAction("com.example.hyc.colorlight.demo.MQTT.Add");
-        getContext().registerReceiver(addReceiver,filter);
+        getContext().registerReceiver(addReceiver, filter);
 
         //=======================database=================//
-        boolean isTableExist=true;
 
-        SQLiteDatabase db0= getContext().openOrCreateDatabase("LightStore.db", 0, null);
-        Cursor c=db0.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Light'", null);
-        Log.d(TAG, "onCreate: cursor.Count="+c.getColumnCount());
-        Log.d(TAG, "onCreate: light = "+c.getCount());
 
-        if (c.getCount()==0) {
-            isTableExist=false;
-        }
+        /*
+        new Database
+        */
 
-        c.close();
-        db0.close();
+        lightList = DataSupport.findAll(Light.class);
 
-        if(isTableExist == false){
-            databaseHelper = new MyDatabaseHelper(getContext(),"LightStore.db",null,1);
-        }else{
-            databaseHelper = new MyDatabaseHelper(getContext());
-        }
-
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        //查询Light表中所有数据
-
-        Cursor cursor = db.query("Light",null,null,null,null,null,null);
-        int length = cursor.getCount();
-        Log.d(TAG, "onCreate: length = "+length);
-        if(length == 0){
+        if (lightList.size() == 0) {
             showSnackBar("扫码或手动添加设备");
-        }
-        Light[] tempLights = new Light[length];
-        lights = tempLights;
 
-        int i = 0;
-        if(cursor.moveToFirst()){
-            do {
-                //遍历Cursor对象,并取出数据
-                String name = cursor.getString(cursor.getColumnIndex("name"));
-                String id = cursor.getString(cursor.getColumnIndex("id"));
-                String type = cursor.getString(cursor.getColumnIndex("type"));
-                int isConfig = cursor.getInt(cursor.getColumnIndex("isConfig"));
-                switch (i%5){
-                    case 0:
-                        lights[i] = new Light(name,type,R.drawable.light1,id,isConfig);
-                        break;
-                    case 1:
-                        lights[i] = new Light(name,type,R.drawable.light2,id,isConfig);
-                        break;
-                    case 2:
-                        lights[i] = new Light(name,type,R.drawable.light3,id,isConfig);
-                        break;
-                    case 3:
-                        lights[i] = new Light(name,type,R.drawable.light4,id,isConfig);
-                        break;
-                    case 4:
-                        lights[i] = new Light(name,type,R.drawable.light5,id,isConfig);
-                        break;
-                    default:
-                        break;
-                }
-                i++;
-            }while(cursor.moveToNext());
         }
+/*
+new database end
+* */
+//        boolean isTableExist = true;
+//
+//        SQLiteDatabase db0 = getContext().openOrCreateDatabase("LightStore.db", 0, null);
+//        Cursor c = db0.rawQuery("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='Light'", null);
+//        Log.d(TAG, "onCreate: cursor.Count=" + c.getColumnCount());
+//        Log.d(TAG, "onCreate: light = " + c.getCount());
+//
+//        if (c.getCount() == 0) {
+//            isTableExist = false;
+//        }
+//
+//        c.close();
+//        db0.close();
+//
+//        if (isTableExist == false) {
+//            databaseHelper = new MyDatabaseHelper(getContext(), "LightStore.db", null, 1);
+//        } else {
+//            databaseHelper = new MyDatabaseHelper(getContext());
+//        }
+//
+//        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+//        //查询Light表中所有数据
+//
+//        Cursor cursor = db.query("Light", null, null, null, null, null, null);
+//        int length = cursor.getCount();
+//        Log.d(TAG, "onCreate: length = " + length);
+//        if (length == 0) {
+//            showSnackBar("扫码或手动添加设备");
+//        }
+//        Light[] tempLights = new Light[length];
+//        lights = tempLights;
+//
+//        int i = 0;
+//        if (cursor.moveToFirst()) {
+//            do {
+//                //遍历Cursor对象,并取出数据
+//                String name = cursor.getString(cursor.getColumnIndex("name"));
+//                String id = cursor.getString(cursor.getColumnIndex("id"));
+//                String type = cursor.getString(cursor.getColumnIndex("type"));
+//                int isConfig = cursor.getInt(cursor.getColumnIndex("isConfig"));
+//                switch (i % 5) {
+//                    case 0:
+//                        lights[i] = new Light(name, type, R.drawable.light1, id, isConfig);
+//                        break;
+//                    case 1:
+//                        lights[i] = new Light(name, type, R.drawable.light2, id, isConfig);
+//                        break;
+//                    case 2:
+//                        lights[i] = new Light(name, type, R.drawable.light3, id, isConfig);
+//                        break;
+//                    case 3:
+//                        lights[i] = new Light(name, type, R.drawable.light4, id, isConfig);
+//                        break;
+//                    case 4:
+//                        lights[i] = new Light(name, type, R.drawable.light5, id, isConfig);
+//                        break;
+//                    default:
+//                        break;
+//                }
+//                i++;
+//            } while (cursor.moveToNext());
+//        }
     }
 
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_device, container,false);
+        view = inflater.inflate(R.layout.fragment_device, container, false);
 
-        recyclerView = (SwipeMenuRecyclerView)view.findViewById(R.id.recycler_view);
-        GridLayoutManager layoutManager = new GridLayoutManager(view.getContext(),1);
+        recyclerView = (SwipeMenuRecyclerView) view.findViewById(R.id.recycler_view);
+        GridLayoutManager layoutManager = new GridLayoutManager(view.getContext(), 1);
         recyclerView.setLayoutManager(layoutManager);
 
         recyclerView.setLongPressDragEnabled(true); // 拖拽排序，默认关闭。
@@ -165,10 +182,14 @@ public class DeviceFragment extends Fragment {
                 if (fromPosition < toPosition)
                     for (int i = fromPosition; i < toPosition; i++)
                         Collections.swap(lightList, i, i + 1);
+
                 else
                     for (int i = fromPosition; i > toPosition; i--)
                         Collections.swap(lightList, i, i - 1);
-                updateSQLiteData();
+//                updateSQLiteData();
+                DataSupport.deleteAll(Light.class);
+                DataSupport.saveAll(lightList);
+
                 adapter.notifyItemMoved(fromPosition, toPosition);
                 return true;
             }
@@ -232,26 +253,24 @@ public class DeviceFragment extends Fragment {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         db.execSQL("DELETE FROM Light");
         ContentValues values = new ContentValues();
-        for(int i = 0;i < lightList.size(); i++)
-        {
-            values.put("name",lightList.get(i).getName());
-            values.put("id",lightList.get(i).getId());
-            values.put("type",lightList.get(i).getType());
-            values.put("isConfig",lightList.get(i).getIsConfig());
-            db.insert("Light",null,values);
+        for (int i = 0; i < lightList.size(); i++) {
+            values.put("name", lightList.get(i).getName());
+            values.put("id", lightList.get(i).getId());
+            values.put("type", lightList.get(i).getType());
+            values.put("isConfig", lightList.get(i).getIsConfig());
+            db.insert("Light", null, values);
             values.clear();
         }
     }
 
-    private void initLights(){
-        lightList.clear();
-        for(int i = 0; i < lights.length; i++) {
-            Log.d(TAG, "initLights: light[" + i + "] = " + lights[i]);
-            lightList.add(lights[i]);
-        }
-
+    private void initLights() {
+//        lightList.clear();
+//        for (int i = 0; i < lights.length; i++) {
+//            Log.d(TAG, "initLights: light[" + i + "] = " + lights[i]);
+//            lightList.add(lights[i]);
+//        }
         adapter = new LampAdapter(lightList);
-        Log.d(TAG, "initLights: adapter="+adapter);
+        Log.d(TAG, "initLights: adapter=" + adapter);
         recyclerView.setAdapter(adapter);
     }
 
@@ -261,38 +280,40 @@ public class DeviceFragment extends Fragment {
 
         lightList.remove(position);
         adapter.notifyItemRemoved(position);
-        if(lightList.size()==0){
+        if (lightList.size() == 0) {
             showSnackBar("没有设备?\n请通过上方扫码或手动添加");
         }
         //=======================database=====================//
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        long l = db.delete("Light","id = ?",new String[]{deleteId});
-        Toast.makeText(view.getContext(),"删除成功",Toast.LENGTH_SHORT).show();
+        long l = db.delete("Light", "id = ?", new String[]{deleteId});
+        Toast.makeText(view.getContext(), "删除成功", Toast.LENGTH_SHORT).show();
+        /*
+              * new delete
+         */
+        DataSupport.delete(Light.class, Long.parseLong(deleteId));
         //====================================================//
     }
 
-    private void updateHomeView(String new_light_name, String new_type, String new_light_id,int isConfig)
-    {
-        if(new_light_name!=null&&new_light_id!=null)
-        {
-            Light[] temlights = new Light[lights.length+1];
-            System.arraycopy(lights,0,temlights,0,lights.length);
+    private void updateHomeView(String new_light_name, String new_type, String new_light_id, int isConfig) {
+        if (new_light_name != null && new_light_id != null) {
+            Light[] temlights = new Light[lights.length + 1];
+            System.arraycopy(lights, 0, temlights, 0, lights.length);
 
-            switch (lights.length%5){
+            switch (lights.length % 5) {
                 case 0:
-                    temlights[lights.length] = new Light(new_light_name,new_type,R.drawable.light1,new_light_id,isConfig);
+                    temlights[lights.length] = new Light(new_light_name, new_type, R.drawable.light1, new_light_id, isConfig);
                     break;
                 case 1:
-                    temlights[lights.length] = new Light(new_light_name,new_type,R.drawable.light2,new_light_id,isConfig);
+                    temlights[lights.length] = new Light(new_light_name, new_type, R.drawable.light2, new_light_id, isConfig);
                     break;
                 case 2:
-                    temlights[lights.length] = new Light(new_light_name,new_type,R.drawable.light3,new_light_id,isConfig);
+                    temlights[lights.length] = new Light(new_light_name, new_type, R.drawable.light3, new_light_id, isConfig);
                     break;
                 case 3:
-                    temlights[lights.length] = new Light(new_light_name,new_type,R.drawable.light4,new_light_id,isConfig);
+                    temlights[lights.length] = new Light(new_light_name, new_type, R.drawable.light4, new_light_id, isConfig);
                     break;
                 case 4:
-                    temlights[lights.length] = new Light(new_light_name,new_type,R.drawable.light5,new_light_id,isConfig);
+                    temlights[lights.length] = new Light(new_light_name, new_type, R.drawable.light5, new_light_id, isConfig);
                     break;
                 default:
                     break;
@@ -300,17 +321,17 @@ public class DeviceFragment extends Fragment {
 
             lights = temlights;
 
-            lightList.add(temlights[lights.length-1]);
+            lightList.add(temlights[lights.length - 1]);
 
             //======================database=====================//
             SQLiteDatabase db = databaseHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put("name",new_light_name);
-            values.put("id",new_light_id);
-            values.put("type",new_type);
-            values.put("isConfig",isConfig);
-            long i = db.insert("Light",null,values);
-            Toast.makeText(view.getContext(),"添加成功",Toast.LENGTH_SHORT).show();
+            values.put("name", new_light_name);
+            values.put("id", new_light_id);
+            values.put("type", new_type);
+            values.put("isConfig", isConfig);
+            long i = db.insert("Light", null, values);
+            Toast.makeText(view.getContext(), "添加成功", Toast.LENGTH_SHORT).show();
             //=====================================================//
 
             adapter = new LampAdapter(lightList);
@@ -318,15 +339,15 @@ public class DeviceFragment extends Fragment {
         }
     }
 
-    private void callSelfDialog(String type, String id){
-        selfDialog = new SelfDialog(view.getContext(),type,id,"确定",new SelfDialog.PriorityListener() {
+    private void callSelfDialog(String type, String id) {
+        selfDialog = new SelfDialog(view.getContext(), type, id, "确定", new SelfDialog.PriorityListener() {
             @Override
             public void refreshPriorityUI(String new_light_name, String new_type, String new_light_id) {
                 WindowManager.LayoutParams lp = ((AppCompatActivity) getActivity()).getWindow().getAttributes();
                 lp.alpha = 1.0f;
                 ((AppCompatActivity) getActivity()).getWindow().setAttributes(lp);
                 ((AppCompatActivity) getActivity()).getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-                updateHomeView(new_light_name, new_type, new_light_id,0);
+                updateHomeView(new_light_name, new_type, new_light_id, 0);
             }
         });
 
@@ -377,8 +398,8 @@ public class DeviceFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String type = intent.getStringExtra("type");
             String id = intent.getStringExtra("id");
-            Log.d(TAG, "onReceive: AddRecevier="+type);
-            callSelfDialog(type,id);
+            Log.d(TAG, "onReceive: AddRecevier=" + type);
+            callSelfDialog(type, id);
         }
     }
 }

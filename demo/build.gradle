@@ -38,12 +38,13 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.2'
     implementation 'com.github.yuzhiqiang1993:zxing:2.1.6'
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
-    compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.0'
+    compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     implementation project(':config')
-    compile 'com.jakewharton:butterknife:8.6.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.8.2@aar'
     compile 'io.reactivex:rxjava:1.1.5'
     compile 'com.github.hackware1993:MagicIndicator:1.5.0'
     compile 'com.yanzhenjie:recyclerview-swipe:1.1.4'
+    compile 'org.litepal.android:core:1.6.1'
 }

@@ -1,10 +1,12 @@
 package com.example.hyc.colorlight.demo;
 
+import org.litepal.crud.DataSupport;
+
 /**
  * Created by hyc on 18-5-24.
  */
 
-public class Light {
+public class Light extends DataSupport {
     private String name;
     private String id;
     private String type;
@@ -50,7 +52,7 @@ public class Light {
         this.newColor = newColor;
     }
 
-    public Light(String name,String type, int imageId, String id,int isConfig){
+    public Light(String name, String type, int imageId, String id, int isConfig) {
         this.name = name;
         this.type = type;
         this.imageId = imageId;
